@@ -28,6 +28,7 @@ define ([
 			this.updateResource = '';
 			this.createResource = '';
 			this.deleteResource = '';
+			this.expressoVersion = Shared.expressoVersion;
 		},
 
 		getSearchString: function() {

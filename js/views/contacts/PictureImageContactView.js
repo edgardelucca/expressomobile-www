@@ -16,16 +16,19 @@
 			{
 				var contactID = decodeURIComponent(value.contact.get('contactID'));
 				var id;
-
-				if (parseInt(contactID) != NaN && parseInt(contactID) % 1 == 0)
-					id = contactID;
-				else
-				{
-					var queryUID = contactID.split(",")[0]; 
-					var uid = queryUID.split("=");
-					id = uid[1].replace(".", "___");
+				
+				if (Shared.expressoVersion === '3.0') {
+				    id = contactID;
+				} else {
+				    if (parseInt(contactID) != NaN && parseInt(contactID) % 1 == 0)
+					    id = contactID;
+				    else
+				    {
+					    var queryUID = contactID.split(",")[0]; 
+					    var uid = queryUID.split("=");
+					    id = uid[1].replace(".", "___");
+				    }
 				}
-
 				$('#picture_contact_' + id + ' img').attr('src', 'data:image/gif;base64,' + value.contact.get('contactImagePicture'));
 			}
 

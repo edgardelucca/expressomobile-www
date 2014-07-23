@@ -259,6 +259,9 @@ define([
 		{
 			if (!Shared.isSmartPhoneResolution())
 			{
+			    if (Shared.expressoVersion === '3.0') {
+				id = contactID;
+			    } else {
 				if (parseInt(contactID) != NaN && parseInt(contactID) % 1 == 0)
 					id = contactID;
 				else
@@ -269,6 +272,10 @@ define([
 					var uid = queryUID.split("=");
 					id = uid[1].replace(".", "___");
 				}
+
+			    }
+
+
 
 				$('#contactsList ul li').removeAttr('class');
 				$('#' + id).addClass('selected');

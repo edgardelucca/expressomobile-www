@@ -80,7 +80,12 @@ define([
             Shared.im_url = resultChat.B;
             Shared.im_domain = resultChat.C;
             var im_userName = resultChat.D;
-            var im_password = resultChat.E + "==";
+            var im_password;
+	    if (Shared.expressoVersion === '3.0'){
+		im_password = resultChat.E;
+	    } else {
+		im_password = resultChat.E + "==";
+	    }
 
             Shared.im.resource("EXPRESSO_MOBILE").url(Shared.im_url).domain(Shared.im_domain);
 

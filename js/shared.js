@@ -29,8 +29,9 @@ define([
 
   Shared.context = "/api/";
 
-  Shared.ComunityServerURL = "http://api.expressolivre.org/";
-
+  //Shared.ComunityServerURL = "http://api.expressolivre.org/";
+  Shared.ComunityServerURL = "http:\/\/10.200.118.192\/expressocelepar\/";
+  
   Shared.settings = {};
 
   Shared.settings.resultsPerPage = 25;
@@ -534,7 +535,12 @@ define([
       Shared.im_url = resultChat.B;
       Shared.im_domain = resultChat.C;
       var im_userName = resultChat.D;
-      var im_password = resultChat.E + "==";
+      var im_password;
+      if (Shared.expressoVersion === '3.0'){
+	im_password = resultChat.E;
+      } else {
+	im_password = resultChat.E + "==";
+      }
 
       Shared.im.resource("EXPRESSO_MOBILE").url(Shared.im_url).domain(Shared.im_domain);
 

@@ -22,10 +22,14 @@
 					<% } %>
 
 					<% 
-					var contactID = decodeURIComponent(c.get('contactID'));
-					var queryUID = contactID.split(",")[0]; 
-					var uid = queryUID.split("=");
-					var id = uid[1].replace(".", "___");
+					if (c.expressoVersion === '3.0') {
+					    var id = decodeURIComponent(c.get('contactID'));
+					} else {				 	
+					    var contactID = decodeURIComponent(c.get('contactID'));
+					    var queryUID = contactID.split(",")[0]; 
+					    var uid = queryUID.split("=");
+					    var id = uid[1].replace(".", "___");
+					}
 					%>
 
 					<li id="<%=id%>">

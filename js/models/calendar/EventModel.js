@@ -98,9 +98,15 @@ define ([
 			var listUidNumbers = []; 
 			var that = this;
 
-			for (var i in listParticipants)
+			if (Shared.expressoVersion === '3.0') {
+			    for (var i in listParticipants){
+				listUidNumbers.push(listParticipants[i].contactUIDNumber);
+			    }
+			} else {
+			    for (var i in listParticipants){
 				listUidNumbers.push(parseInt(listParticipants[i].contactUIDNumber));
-
+			    }
+			}
 			var pContactID = JSON.stringify(listUidNumbers);
 
 			var detailsContactCollection = new DetailsContactCollection();
