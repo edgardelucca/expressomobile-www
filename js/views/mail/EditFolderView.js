@@ -193,7 +193,7 @@ define([
           Shared.showMessage(message);
 
           Shared.deviceType(Shared.isSmartPhoneResolution());
-
+	  this.folderID = result.folderID;
           Shared.menuView.refreshFolders();
 
           Shared.router.navigate("/Mail/Messages/1/0/" + result.folderID + "#",{ trigger: true });
