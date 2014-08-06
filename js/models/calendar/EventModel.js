@@ -1,201 +1,190 @@
-define ([
-	'underscore',
-	'backbone',
-	'shared',
-	'models/contacts/ContactModel',
-	'collections/contacts/DetailsContactCollection',
-	'json2'
-], function (_, Backbone, Shared, ContactModel, DetailsContactCollection, json2) 
+define([
+    'underscore',
+    'backbone',
+    'shared',
+    'models/contacts/ContactModel',
+    'collections/contacts/DetailsContactCollection',
+    'json2'
+], function(_, Backbone, Shared, ContactModel, DetailsContactCollection, json2)
 {
-	var EventModel = Backbone.Model.extend(
-	{
+    var EventModel = Backbone.Model.extend(
+	    {
 		defaults:
+			{
+			    eventID: '',
+			    eventDate: '',
+			    eventName: '',
+			    eventDescription: '',
+			    eventLocation: '',
+			    eventParticipants: [],
+			    eventParticipantsLdap: [],
+			    eventStartDate: '',
+			    eventEndDate: '',
+			    eventAllDay: "0",
+			    eventExParticipants: '',
+			    eventCategoryID: '',
+			    eventDateEnd: '',
+			    eventDateStart: '',
+			    eventOwner: '',
+			    eventOwnerIsParticipant: '',
+			    eventPriority: '',
+			    eventTimeEnd: '',
+			    eventTimeStart: '',
+			    eventType: ''
+			},
+		initialize: function()
 		{
-	        eventID: '',
-	        eventDate: '',
-	        eventName: '',
-	        eventDescription: '',
-	        eventLocation: '',
-	        eventParticipants: [],
-	        eventParticipantsLdap: [],
-	        eventStartDate: '',
-	        eventEndDate: '',
-	        eventAllDay: "0",
-	        eventExParticipants: '',
-			eventCategoryID: '',
-			eventDateEnd: '',
-			eventDateStart: '',
-			eventDescription: '',
-			eventOwner: '',
-			eventOwnerIsParticipant: '',
-			eventPriority: '',
-			eventTimeEnd: '',
-			eventTimeStart: '',
-			eventType: ''
+		    this.api = Shared.api;
+		    this.readResource = '/Calendar/Events';
+		    this.updateResource = '';
+		    this.createResource = '';
+		    this.deleteResource = '';
 		},
-
-		initialize: function ()
+		route: function()
 		{
-			this.api = Shared.api;
-			this.readResource = '/Calendar/Events';
-			this.updateResource = '';
-			this.createResource = '';
-			this.deleteResource = '';
+		    return '/Calendar';
 		},
-
-		route: function() 
+		done: function(value)
 		{
-			return '/Calendar';
-		},
+		    this.done = value;
 
-		done: function (value)
+		    return this;
+		},
+		fail: function(value)
 		{
-			this.done = value;
+		    this.fail = value;
 
-			return this;
+		    return this;
 		},
-
-		fail: function (value)
+		getEvent: function(pEventID)
 		{
-			this.fail = value;
-
-			return this;
-		},
-
-		getEvent: function (pEventID)
-		{	
-			var that = this;
-
-			this.api
-			.resource('Calendar/Event')
-			.params({eventID: pEventID})
-	        .done(function (result)
-	        {
+		    var that = this;
+		    this.api
+			    .resource('Calendar/Event')
+			    .params({eventID: pEventID})
+			    .done(function(result)
+			    {
 				that.set(result.events[0]);
 				that.getEventOwner();
-	        })
-	        .fail( function (error) 
-	        {
+			    })
+			    .fail(function(error)
+			    {
 				if (that.fail)
-	        		that.fail(error);
-	        })
-	        .execute();
-
-			return that;
-
+				    that.fail(error);
+			    })
+			    .execute();
+		    return that;
 		},
-
-		getPriority: function ()
+		getPriority: function()
 		{
-			var priority = ['-', 'Baixa', 'Normal', 'Alta'];
-
-			return priority[this.get('eventPriority')];
+		    var priority = ['-', 'Baixa', 'Normal', 'Alta'];
+		    return priority[this.get('eventPriority')];
 		},
-
-		getEventParticipants: function (callback)
+		getEventParticipants: function(callback)
 		{
-			var listParticipants = this.get('eventParticipants');
-			var listUidNumbers = []; 
-			var that = this;
+		    var listParticipants = this.get('eventParticipants');
+		    var listUidNumbers = []
+		    var that = this;
 
-			if (Shared.expressoVersion === '3.0') {
-			    for (var i in listParticipants){
-				listUidNumbers.push(listParticipants[i].contactUIDNumber);
-			    }
-			} else {
-			    for (var i in listParticipants){
-				listUidNumbers.push(parseInt(listParticipants[i].contactUIDNumber));
-			    }
+		    var detailsContactCollection = new DetailsContactCollection();
+
+		    if (Shared.expressoVersion === '3.0') {
+			for (var i in listParticipants) {
+			    listUidNumbers.push(listParticipants[i].contactUIDNumber);
+
+			    detailsContactCollection.add({
+				contactFullName: listParticipants[i].contactName
+			    });
+			    that.set({eventParticipantsLdap: detailsContactCollection.models});
+			    if (that.done)
+				that.done(that);
 			}
+
+		    } else {
+			for (var i in listParticipants) {
+			    listUidNumbers.push(parseInt(listParticipants[i].contactUIDNumber));
+			}
+		    }
+
+		    if (Shared.expressoVersion === '3.0') {
 			var pContactID = JSON.stringify(listUidNumbers);
 
 			var detailsContactCollection = new DetailsContactCollection();
-				detailsContactCollection.getGeneralContactDetails(pContactID)
-				.done (function (data) 
+			detailsContactCollection.getGeneralContactDetails(pContactID)
+				.done(function(data)
 				{
-					that.set({eventParticipantsLdap: data.models});
+				    that.set({eventParticipantsLdap: data.models});
+				    if (that.done)
+					that.done(that)
+				})
+				.fail(function(error)
+				{
+				    if (that.fail)
+					that.fail(error);
+				})
 
-					 if (that.done)
-		        		that.done(that)
-				})
-				.fail (function (error) 
-				{
-					if (that.fail)
-		        		that.fail(error);
-				})
+		    }
 		},
-
-		getEventOwner: function (callback)
+		getEventOwner: function(callback)
 		{
-			var that = this;
-
-			var detailsContactCollection = new DetailsContactCollection();
-				detailsContactCollection.getGeneralContactDetails(this.get('eventOwner'))
-				.done (function (data) 
-				{
-					that.set({eventOwner: data.models[0]});
-	        		that.getEventParticipants();
-				})
-				.fail (function (error) 
-				{
-
-					if (that.fail)
-		        		that.fail(error);
-				})
+		    var that = this;
+		    var detailsContactCollection = new DetailsContactCollection();
+		    detailsContactCollection.getGeneralContactDetails(this.get('eventOwner'))
+			    .done(function(data)
+			    {
+				that.set({eventOwner: data.models[0]});
+				that.getEventParticipants();
+			    })
+			    .fail(function(error)
+			    {
+				if (that.fail)
+				    that.fail(error);
+			    });
 		},
-
-		saveEvent: function (params)
+		saveEvent: function(params)
 		{
-			var that = this;
-
-			this.api
-			.resource('Calendar/AddEvent')
-			.params(params)
-			.done(function (result)
-			{
+		    var that = this;
+		    this.api
+			    .resource('Calendar/AddEvent')
+			    .params(params)
+			    .done(function(result)
+			    {
 				var thisModel = new EventModel(result.events[0]);
-
-		        if (that.done)
-	        		that.done(thisModel);
-			})
-			.fail( function (error) 
-			{
+				if (that.done)
+				    that.done(thisModel);
+			    })
+			    .fail(function(error)
+			    {
 				if (that.fail)
-		        		that.fail(error);
-			})
-			.execute();
-
-			return that;
+				    that.fail(error);
+			    })
+			    .execute();
+		    return that;
 		},
-
-		deleteEvent: function (pEventID)
+		deleteEvent: function(pEventID)
 		{
-			var that = this;
-
-			this.api
-			.resource('Calendar/DelEvent')
-			.params({ eventID: pEventID })
-			.done(function (result)
-			{
-		        if (that.done)
-	        		that.done(result);
-			})
-			.fail( function (error) 
-			{
+		    var that = this;
+		    this.api
+			    .resource('Calendar/DelEvent')
+			    .params({eventID: pEventID})
+			    .done(function(result)
+			    {
+				if (that.done)
+				    that.done(result);
+			    })
+			    .fail(function(error)
+			    {
 				if (that.fail)
-		        		that.fail(error);
-			})
-			.execute();
+				    that.fail(error);
+			    })
+			    .execute();
 
-			return that;
+		    return that;
 		},
-
-		execute: function ()
+		execute: function()
 		{
-			return this.api.execute();
+		    return this.api.execute();
 		}
-	});
-
-	return EventModel;
-
+	    });
+    return EventModel;
 });
