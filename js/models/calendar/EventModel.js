@@ -106,7 +106,7 @@ define([
 			}
 		    }
 
-		    if (Shared.expressoVersion === '3.0') {
+		    if (Shared.expressoVersion !== '3.0') {
 			var pContactID = JSON.stringify(listUidNumbers);
 
 			var detailsContactCollection = new DetailsContactCollection();
