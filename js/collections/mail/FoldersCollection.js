@@ -88,14 +88,14 @@ define([
 		    });
 	    return that;
 	},
-	cleanTrash: function() {
+	cleanTrash: function(PfolderID) {
 	    var that = this;
 	    that._data = {};
 	    var thatModel = FoldersModel;
 	    var data = this._data;
 	    this.api
 		    .resource('/Mail/CleanTrash')
-		    .params({})
+		    .params({folderID: PfolderID})
 		    .done(function(result) {
 			if (that._data.done) {
 			    that._data.done(result);

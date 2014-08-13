@@ -27,7 +27,7 @@ define([
     Shared.context = "/api/";
 
     //Shared.ComunityServerURL = "http://api.expressolivre.org/";
-    Shared.ComunityServerURL = "http:\/\/10.200.118.192\/expressocelepar\/";
+    Shared.ComunityServerURL = "http://10.200.24.79/expressocelepar/";
 
     Shared.settings = {};
 
@@ -301,7 +301,7 @@ define([
     };
 
     Shared.scheduleCheckForNewMessages = function() {
-	Shared.checkForNewMessages();
+	//Shared.checkForNewMessages();
 	setInterval(Shared.checkForNewMessages, 70000);
 	setInterval(Shared.refreshFolders, 3 * 60000);
     };

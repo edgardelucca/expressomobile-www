@@ -88,6 +88,7 @@ define([
 
 		    var detailsContactCollection = new DetailsContactCollection();
 
+
 		    if (Shared.expressoVersion === '3.0') {
 			for (var i in listParticipants) {
 			    listUidNumbers.push(listParticipants[i].contactUIDNumber);
@@ -95,9 +96,11 @@ define([
 			    detailsContactCollection.add({
 				contactFullName: listParticipants[i].contactName
 			    });
-			    that.set({eventParticipantsLdap: detailsContactCollection.models});
-			    if (that.done)
-				that.done(that);
+
+			}
+			that.set({eventParticipantsLdap: detailsContactCollection.models});
+			if (that.done) {
+			    that.done(that);
 			}
 
 		    } else {
@@ -128,18 +131,28 @@ define([
 		getEventOwner: function(callback)
 		{
 		    var that = this;
-		    var detailsContactCollection = new DetailsContactCollection();
-		    detailsContactCollection.getGeneralContactDetails(this.get('eventOwner'))
-			    .done(function(data)
-			    {
-				that.set({eventOwner: data.models[0]});
-				that.getEventParticipants();
-			    })
-			    .fail(function(error)
-			    {
-				if (that.fail)
-				    that.fail(error);
-			    });
+		    if (Shared.expressoVersion !== '3.0') {
+			var detailsContactCollection = new DetailsContactCollection();
+			detailsContactCollection.getGeneralContactDetails(this.get('eventOwner'))
+				.done(function(data)
+				{
+				    console.log(data.models[0]);
+				    that.set({eventOwner: data.models[0]});
+				    that.getEventParticipants();
+				})
+				.fail(function(error)
+				{
+				    if (that.fail)
+					that.fail(error);
+				});
+		    } else {
+			var contactModel = new ContactModel({
+			    contactUIDNumber: this.get('eventOwner'),
+			    contactFullName: this.get('eventOwnerName')
+			});
+			that.set({eventOwner: contactModel});
+			that.getEventParticipants();
+		    }
 		},
 		saveEvent: function(params)
 		{

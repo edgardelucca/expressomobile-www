@@ -9,7 +9,8 @@ define([
     'collections/mail/MessagesCollection',
     'views/home/LoadingView',
     'views/mail/DetailMessageView',
-], function($, _, Backbone, Shared, messagesListTemplate, MessagesListItemsView, FoldersCollection, MessagesCollection, LoadingView, DetailMessageView) {
+    'models/mail/FoldersModel'
+], function($, _, Backbone, Shared, messagesListTemplate, MessagesListItemsView, FoldersCollection, MessagesCollection, LoadingView, DetailMessageView, FoldersModel) {
     var MessagesListView = Backbone.View.extend({
 	currentFolder: [],
 	parentFolders: [],
@@ -113,6 +114,78 @@ define([
 	    var messagesData = new MessagesCollection();
 	    var foldersCollection = new FoldersCollection();
 	    var that = this;
+	    if (Shared.folders === undefined) {
+		that.currentFolder = new FoldersModel({
+		    folderType: 0,
+		    folderName: 'Caixa de Entrada'
+		});
+		that.parentFolders = [];
+	    }
+	    else {
+		that.currentFolder = Shared.folders.getFolderByID(pFolderID);
+		that.parentFolders = Shared.folders.getSubFoldersFromFolderID(pFolderID);
+	    }
+
+	    messagesData.getMessagesInFolder(pFolderID, '', pSearch, pPage).done(function(data) {
+		that.collection = data.models;
+		if (beforeRenderCallback) {
+		    beforeRenderCallback(that.collection);
+		}
+		var messagesListItemsView = new MessagesListItemsView({el: $("#scrollerList"), collection: data, parentFolders: that.parentFolders});
+		if (!appendAtEnd) {
+		    messagesListItemsView.parentFolders = that.parentFolders;
+		} else {
+		    messagesListItemsView.parentFolders = [];
+		}
+		if ((that.msgID == "") || (that.msgID == "0")) {
+		    if (data.length) {
+			if (Shared.isTabletResolution()) {
+			    that.msgID = data.models[0].get("msgID");
+			}
+		    }
+		}
+		messagesListItemsView.msgIDSelected = that.msgID;
+		messagesListItemsView.render(appendAtEnd);
+		if (doneCallback) {
+		    doneCallback();
+		}
+		var top = $('.topHeader').outerHeight(true);
+		var search = $('.searchArea').outerHeight(true) == null ? 0 : $('.searchArea').outerHeight(true);
+		$('body').height($(window).height() - top);
+		$('#wrapper').css('top', top + search);
+		Shared.refreshDotDotDot();
+		Shared.scrollerRefresh();
+
+		foldersCollection.getFolders(this.folderID, this.search).done(function(foldersData) {
+		    var currentFolder = foldersData.getFolderByID(that.folderID);
+		    var parentFolders = foldersData.getSubFoldersFromFolderID(that.folderID);
+		    
+		    that.currentFolder = currentFolder;
+		    that.parentFolders = parentFolders;
+		    Shared.refreshDotDotDot();
+		    Shared.scrollerRefresh();
+		    //atualizar lista de pastas e nome da pasta atual
+		    // :TODO 
+		}).execute();
+
+	    })
+		    .fail(function(result) {
+			Shared.handleErrors(result.error);
+			$(that.elementID).empty();
+			$(that.detailElementID).empty();
+			return false;
+		    })
+		    .execute();
+
+
+
+	},
+	/*
+	getMessages: function(pFolderID, pSearch, pPage, appendAtEnd, beforeRenderCallback, doneCallback)
+	{
+	    var messagesData = new MessagesCollection();
+	    var foldersCollection = new FoldersCollection();
+	    var that = this;
 	    foldersCollection.getFolders(this.folderID, this.search).done(function(foldersData) {
 		var currentFolder = foldersData.getFolderByID(that.folderID);
 		var parentFolders = foldersData.getSubFoldersFromFolderID(that.folderID);
@@ -164,6 +237,7 @@ define([
 		    })
 		    .execute();
 	},
+	*/
 	pullDownAction: function()
 	{
 	    this.page = 1;
