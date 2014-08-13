@@ -107,8 +107,8 @@ define([
 		    }
 		    Shared.showMessage(message);
 		    Shared.deviceType(Shared.isSmartPhoneResolution());
-		    //Shared.menuView.refreshFolders();
 		    Shared.router.navigate("/Mail/Messages/1/0/" + result.folderID + "#", {trigger: true});
+		    Shared.menuView.refreshFolders();
 		}).fail(function(result) {
 		    var message = {
 			type: "error",
@@ -139,7 +139,15 @@ define([
 		    }
 		    Shared.showMessage(message);
 		    Shared.deviceType(Shared.isSmartPhoneResolution());
+		    
 		    this.folderID = result.folderID;
+		    
+		    // atualiza pasta com novo nome e novo id
+		    var folder = Shared.folders.getFolderByID(folderID);
+		    Shared.folders.remove(folder);
+		    folder.set("folderID", result.folderID);
+		    folder.set("folderName", folderName);
+		    Shared.folders.add(folder);
 		    Shared.menuView.refreshFolders();
 		    Shared.router.navigate("/Mail/Messages/1/0/" + result.folderID + "#", {trigger: true});
 		}).fail(function(result) {
@@ -172,8 +180,8 @@ define([
 		    elementID: "#pageMessage"
 		};
 		Shared.showMessage(message);
-		Shared.menuView.refreshFolders();
 		Shared.router.navigate("/Mail/Messages/1/0/INBOX#", {trigger: true});
+		Shared.menuView.refreshFolders();
 	    }).fail(function(result) {
 		var message = {
 		    type: "error",

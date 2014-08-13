@@ -56,7 +56,7 @@ define([
 	    this.api
 		    .resource('/Mail/RenameFolder')
 		    .params({folderName: PfolderName, folderID: PfolderID, globalName: PglobalName})
-		    .done(function(result) {
+		    .done(function(result) {		
 			if (that._data.done) {
 			    that._data.done(result);
 			}
@@ -77,6 +77,8 @@ define([
 		    .resource('/Mail/AddFolder')
 		    .params({folderName: PfolderName, parentFolderID: PparentFolderID, parentGlobalName: PparentGlobalName})
 		    .done(function(result) {
+			var folderModel = new thatModel(result);
+			Shared.folders.add(folderModel);	
 			if (that._data.done) {
 			    that._data.done(result);
 			}
@@ -118,7 +120,7 @@ define([
 		    .params({folderID: PfolderID, globalName: PglobalName})
 		    .done(function(result) {
 			if (that._data.done) {
-			    Shared.folders.add(new FoldersModel(result));
+			    //Shared.folders.add(new FoldersModel(result));
 			    that._data.done(result);
 			}
 		    })
